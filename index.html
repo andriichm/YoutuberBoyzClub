@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YoutuberBoyzClub</title>
+  <meta name="description" content="YoutuberBoyzClub — клуб ютуберов: участники и видео.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 70'><rect width='100' height='70' rx='18' fill='%23ff0000'/><path d='M40 20 L66 35 L40 50 Z' fill='white'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <a href="#top" class="logo"><span class="play-sm"></span>YoutuberBoyz<b>Club</b></a>
+    <button class="burger" aria-label="Меню" aria-expanded="false">☰</button>
+    <nav class="links">
+      <a href="#about">О клубе</a>
+      <a href="#members">Участники</a>
+      <a href="#videos">Видео</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <a href="#videos" class="play-big" aria-label="Смотреть видео"><span></span></a>
+      <h1>YOUTUBER <b>BOYZ</b> CLUB</h1>
+      <p class="lead">Снимаем, монтируем и делаем контент вместе. Без лишних слов — просто жми play.</p>
+      <div class="stats">
+        <div><strong id="stat-members">0</strong><span>участника</span></div>
+        <div><strong id="stat-videos">0</strong><span>видео</span></div>
+        <div><strong>▶</strong><span>всегда в эфире</span></div>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <h2>О клубе</h2>
+      <div class="features">
+        <article><span class="num">01</span><h3>Игры и челленджи</h3><p>Совместные летсплеи, турниры и челленджи.</p></article>
+        <article><span class="num">02</span><h3>Контент вместе</h3><p>Сценарии, съёмка и монтаж — помогаем друг другу.</p></article>
+        <article><span class="num">03</span><h3>Рост каналов</h3><p>Коллабы и поддержка, чтобы каждый канал рос.</p></article>
+      </div>
+    </section>
+
+    <section id="members" class="section">
+      <h2>Участники</h2>
+      <div class="grid members" id="members-grid"></div>
+    </section>
+
+    <section id="videos" class="section">
+      <h2>Видео</h2>
+      <div class="grid videos" id="videos-grid"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a href="#top" class="logo"><span class="play-sm"></span>YoutuberBoyz<b>Club</b></a>
+    <div class="socials" id="socials"></div>
+    <p>© <span id="year"></span> YoutuberBoyzClub</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
