@@ -4,14 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>YoutuberBoyzClub</title>
-  <meta name="description" content="YoutuberBoyzClub — клуб ютуберов: участники и видео.">
+  <meta name="description" content="YoutuberBoyzClub — клуб ютуберов Нокси и Rumzik: Roblox, мемы и шортсы.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 70'><rect width='100' height='70' rx='18' fill='%23ff0000'/><path d='M40 20 L66 35 L40 50 Z' fill='white'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="progress" id="progress"></div>
+
   <header class="nav">
     <a href="#top" class="logo"><span class="play-sm"></span>YoutuberBoyz<b>Club</b></a>
     <button class="burger" aria-label="Меню" aria-expanded="false">☰</button>
@@ -24,32 +26,39 @@
 
   <main id="top">
     <section class="hero">
-      <a href="#videos" class="play-big" aria-label="Смотреть видео"><span></span></a>
-      <h1>YOUTUBER <b>BOYZ</b> CLUB</h1>
-      <p class="lead">Снимаем, монтируем и делаем контент вместе. Без лишних слов — просто жми play.</p>
+      <div class="floaters" id="floaters" aria-hidden="true"></div>
+      <a href="#videos" class="play-big" aria-label="Смотреть видео">
+        <i class="ring"></i><i class="ring r2"></i><span></span>
+      </a>
+      <h1 class="title" id="title">YOUTUBER <b>BOYZ</b> CLUB</h1>
+      <p class="lead">Roblox, мемы и шортсы, которые смотрят сотни тысяч. Жми play — погнали!</p>
       <div class="stats">
-        <div><strong id="stat-members">0</strong><span>участника</span></div>
-        <div><strong id="stat-videos">0</strong><span>видео</span></div>
-        <div><strong>▶</strong><span>всегда в эфире</span></div>
+        <div><strong data-count="MEMBERS">0</strong><span>участника</span></div>
+        <div><strong data-count="VIEWS">0</strong><span>тыс. просмотров в топе</span></div>
+        <div><strong data-count="VIDEOS">0</strong><span>лучших видео</span></div>
       </div>
+      <a href="#about" class="scroll-hint" aria-label="Листать вниз"><span></span></a>
     </section>
 
+    <div class="ticker" aria-hidden="true"><div class="track" id="ticker"></div></div>
+
     <section id="about" class="section">
-      <h2>О клубе</h2>
+      <h2 class="reveal">О клубе</h2>
       <div class="features">
-        <article><span class="num">01</span><h3>Игры и челленджи</h3><p>Совместные летсплеи, турниры и челленджи.</p></article>
-        <article><span class="num">02</span><h3>Контент вместе</h3><p>Сценарии, съёмка и монтаж — помогаем друг другу.</p></article>
-        <article><span class="num">03</span><h3>Рост каналов</h3><p>Коллабы и поддержка, чтобы каждый канал рос.</p></article>
+        <article class="reveal"><div class="emoji">🎮</div><h3>Roblox каждый день</h3><p>Укради яйцо, брейнроты, обновы и секретные комнаты — всё проверяем первыми.</p></article>
+        <article class="reveal"><div class="emoji">😂</div><h3>Мемы и шортсы</h3><p>Короткие смешные видео про друзей, которые мешают, помогают и попрошайничают.</p></article>
+        <article class="reveal"><div class="emoji">🤝</div><h3>Вместе круче</h3><p>Два канала, одна команда: коллабы, идеи и взаимная поддержка.</p></article>
       </div>
     </section>
 
     <section id="members" class="section">
-      <h2>Участники</h2>
+      <h2 class="reveal">Участники</h2>
       <div class="grid members" id="members-grid"></div>
     </section>
 
     <section id="videos" class="section">
-      <h2>Видео</h2>
+      <h2 class="reveal">Самые популярные видео</h2>
+      <div class="filters reveal" id="filters"></div>
       <div class="grid videos" id="videos-grid"></div>
     </section>
   </main>

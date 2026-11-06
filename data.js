@@ -1,21 +1,40 @@
 // ===== Данные сайта: редактируйте здесь =====
 
-// Участники клуба. channel — ссылка на YouTube-канал, avatar — ссылка на картинку (можно оставить пустой).
+// Участники клуба.
 const MEMBERS = [
-  { name: "Noksik", role: "Ютубер", tag: "@Noksik_2011", channel: "https://www.youtube.com/@Noksik_2011", avatar: "" },
-  { name: "Rumzik", role: "Ютубер", tag: "@Rumzik906", channel: "https://www.youtube.com/@Rumzik906", avatar: "" },
+  {
+    name: "Нокси",
+    handle: "@Noksik_2011",
+    role: "Ютубер · Roblox",
+    channel: "https://www.youtube.com/@Noksik_2011",
+    avatar: "https://yt3.googleusercontent.com/h3pz6ilcwH1BYio9AWo3HI0bxtBls4R1uRSCgBh7YqvixbtJJgiwgO-EeGoLijbpF0cNFw_7bC0=s240-c-k-c0x00ffffff-no-rj",
+  },
+  {
+    name: "Rumzik",
+    handle: "@Rumzik906",
+    role: "Ютубер · Roblox",
+    channel: "https://www.youtube.com/@Rumzik906",
+    avatar: "https://yt3.googleusercontent.com/Q3CsTyv2GpbUa4hsVe8eyUplaDMLZMTVjpJS3K-KClovf7AhH6gFrM_esyFXx3gbJ_7f2vkamQ=s240-c-k-c0x00ffffff-no-rj",
+  },
 ];
 
-// Видео. id — это часть ссылки после "watch?v=", например для
-// https://www.youtube.com/watch?v=abc123XYZ id будет "abc123XYZ".
-// Пока id пустой, показывается заглушка.
+// Самые популярные видео (по просмотрам на 6 ноября 2026).
+// id — часть ссылки после "shorts/" или "watch?v=". views — просто подпись.
 const VIDEOS = [
-  { id: "", title: "Наше первое совместное видео" },
-  { id: "", title: "Челлендж клуба" },
-  { id: "", title: "Лучшие моменты стримов" },
+  { id: "-DcFQy0u96M", author: "Нокси",  views: "311 тыс.", title: "СЕКРЕТНАЯ КОМНАТА В УКРАДИ ЯЙЦО 😱🥚" },
+  { id: "tky6SiBI0Z0", author: "Rumzik", views: "32 тыс.",  title: "КАКОЙ ПИТОМЕЦ У ВАС В УКРАДИ ЯЙЦО?" },
+  { id: "Lfz6eEAmaZ4", author: "Нокси",  views: "33 тыс.",  title: "Кто-то УКРАЛ у меня яйцо в Steal an Egg 😓" },
+  { id: "n7U-Lp2LDsc", author: "Rumzik", views: "32 тыс.",  title: "ПОДПИСУЙТЕСЬ, ЕСЛИ ХОТИТЕ ЕГО!" },
+  { id: "B-36ujy-UvE", author: "Нокси",  views: "31 тыс.",  title: "🥚 ЭТО САМОЕ МАЛЕНЬКОЕ ЯЙЦО В ROBLOX 💀😂" },
+  { id: "7dOLobTop5Y", author: "Rumzik", views: "29 тыс.",  title: "ОЧЕНЬ ДОБРЫЙ ДРУГ В УКРАДИ ЯЙЦО" },
+  { id: "PE_TCDWfL90", author: "Нокси",  views: "30 тыс.",  title: "У меня украли Брейнрота!!! 😭" },
+  { id: "ghd9rPomUOI", author: "Rumzik", views: "29 тыс.",  title: "НАГЛЫЙ ДРУГ В УКРАДИ ЯЙЦО 😦" },
 ];
 
-// Дополнительные ссылки клуба в подвале (каналы участников добавляются сами; пустые не показываются).
+// Бегущая строка.
+const TICKER = ["ROBLOX", "УКРАДИ ЯЙЦО", "МЕМЫ", "ШОРТСЫ", "ЧЕЛЛЕНДЖИ", "БРЕЙНРОТ", "КОЛЛАБЫ"];
+
+// Дополнительные ссылки в подвале (каналы участников добавляются сами; пустые не показываются).
 const SOCIALS = {
   telegram: "",
   discord: "",
