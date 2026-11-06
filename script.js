@@ -137,17 +137,26 @@ const totals = {
   VIDEOS: VIDEOS.length,
   VIEWS: Math.round(VIDEOS.reduce((s, v) => s + viewsNum(v.views), 0)),
 };
-function countUp(el, target) {
+function countUp(el, target, withSound) {
   const start = performance.now(), dur = 3200;
+  let shown = -1;
   const tick = (now) => {
     const p = Math.min((now - start) / dur, 1);
-    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 2)));
+    const v = Math.round(target * (1 - Math.pow(1 - p, 2)));
+    if (v !== shown) {
+      shown = v;
+      el.textContent = v;
+      if (withSound && p < 1) Sound.play("tick", v / target);   // тиканье, всё выше и выше
+    }
     if (p < 1) requestAnimationFrame(tick);
+    else if (withSound) { Sound.play("done"); el.classList.add("bump"); }
   };
   requestAnimationFrame(tick);
 }
 function startCounters() {
-  setTimeout(() => document.querySelectorAll("[data-count]").forEach((el) => countUp(el, totals[el.dataset.count] || 0)), 500);
+  // Звучит самый большой счётчик (просмотры), чтобы тики не накладывались
+  setTimeout(() => document.querySelectorAll("[data-count]").forEach((el) =>
+    countUp(el, totals[el.dataset.count] || 0, el.dataset.count === "VIEWS")), 500);
 }
 
 // ===== Появление блоков при прокрутке =====
@@ -160,7 +169,8 @@ document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 // ===== Звуки кнопок (по умолчанию выключены) =====
 const Sound = (() => {
   let on = false, ctx = null;
-  try { on = localStorage.getItem("ybc-sound") === "1"; } catch (e) {}
+  on = true;                                                     // по умолчанию звук включён
+  try { if (localStorage.getItem("ybc-sound") === "0") on = false; } catch (e) {}
   const btn = $("#sound");
   const paint = () => {
     btn.textContent = on ? "🔊" : "🔇";
@@ -222,11 +232,18 @@ const Sound = (() => {
       [1568, 2093, 2637].forEach((f, i) => tone(f, .1, "triangle", .04, null, .1 + i * .07));
     },
   };
-  let lastHover = 0;
-  function play(name) {
+  // рост чисел: тик, который поднимается по высоте вместе с числом (p — от 0 до 1)
+  sounds.tick = (p) => tone(300 + p * 1300, .03, "square", .035);
+  // число досчиталось: звонкое «динь-динь»
+  sounds.done = () => { tone(1568, .25, "triangle", .08); tone(2093, .35, "triangle", .07, null, .09); };
+
+  let lastHover = 0, lastTick = 0;
+  function play(name, arg) {
     if (!on) return;
-    if (name === "hover") { const n = performance.now(); if (n - lastHover < 120) return; lastHover = n; }
-    try { const a = ac(); if (a.state === "suspended") a.resume(); sounds[name](); } catch (e) {}
+    const n = performance.now();
+    if (name === "hover") { if (n - lastHover < 120) return; lastHover = n; }
+    if (name === "tick") { if (n - lastTick < 45) return; lastTick = n; }
+    try { const a = ac(); if (a.state === "suspended") a.resume(); sounds[name](arg); } catch (e) {}
   }
   document.addEventListener("mouseover", (e) => {
     const c = e.target.closest(".tilt");
@@ -283,6 +300,7 @@ if (matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(pr
   addEventListener("load", () => { pageLoaded = true; });
 
   function step(now) {
+    if (isReady) return;
     let p = Math.min((now - start) / dur, 1);
     if (!pageLoaded && p > .9) p = .9 + (p - .9) * .1;       // ждём, пока страница реально загрузится
     if (now - start > 4000) pageLoaded = true;                // но не дольше 4 секунд
@@ -290,7 +308,27 @@ if (matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(pr
     fill.style.width = eased * 100 + "%";
     pct.textContent = Math.round(eased * 100) + "%";
     if (p < 1 || !pageLoaded) requestAnimationFrame(step);
-    else explode();
+    else ready();
+  }
+
+  // Заполнилось → ждём нажатия (нажатие нужно браузеру, чтобы разрешить звук)
+  let isReady = false;
+  function ready() {
+    if (isReady) return;
+    isReady = true;
+    fill.style.width = "100%";
+    pct.textContent = "НАЖМИ ▶";
+    pct.classList.add("ready");
+    btn.classList.add("full", "ready");
+    loader.classList.add("ready");
+    const go = (e) => {
+      if (e.type === "keydown" && e.key === "Tab") return;
+      loader.removeEventListener("pointerdown", go);
+      removeEventListener("keydown", go);
+      explode();
+    };
+    loader.addEventListener("pointerdown", go);
+    addEventListener("keydown", go);
   }
 
   let exploded = false, finished = false;
@@ -302,14 +340,15 @@ if (matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(pr
     startCounters();
     setTimeout(() => loader.remove(), 600);
   }
-  // Страховка: даже если анимации заморожены (фоновая вкладка), сайт откроется
-  setTimeout(finish, 4500);
+  // Страховка: если анимации заморожены (фоновая вкладка), всё равно показываем «НАЖМИ ▶»
+  setTimeout(ready, 4500);
 
   function explode() {
     if (exploded) return;
     exploded = true;
-    fill.style.width = "100%"; pct.textContent = "100%";
-    btn.classList.add("full");
+    btn.classList.remove("ready");
+    loader.classList.remove("ready");
+    Sound.play("pop");
     setTimeout(() => {
       loader.classList.add("exploding");
       btn.classList.add("boom");
@@ -329,7 +368,7 @@ if (matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(pr
       }
       setTimeout(() => flash.remove(), 600);
       setTimeout(finish, 280);
-    }, 220);
+    }, 120);
   }
 
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
