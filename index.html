@@ -13,6 +13,7 @@
 </head>
 <body>
   <div class="progress" id="progress"></div>
+  <div class="bg" id="bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div></div>
 
   <header class="nav">
     <a href="#top" class="logo"><span class="play-sm"></span>YoutuberBoyz<b>Club</b></a>
@@ -26,12 +27,10 @@
 
   <main id="top">
     <section class="hero">
-      <div class="floaters" id="floaters" aria-hidden="true"></div>
       <a href="#videos" class="play-big" aria-label="Смотреть видео">
         <i class="ring"></i><i class="ring r2"></i><span></span>
       </a>
       <h1 class="title" id="title">YOUTUBER <b>BOYZ</b> CLUB</h1>
-      <p class="lead">Roblox, мемы и шортсы, которые смотрят сотни тысяч. Жми play — погнали!</p>
       <div class="stats">
         <div><strong data-count="MEMBERS">0</strong><span>участника</span></div>
         <div><strong data-count="VIEWS">0</strong><span>тыс. просмотров в топе</span></div>
@@ -51,10 +50,20 @@
       </div>
     </section>
 
+    <div class="bigtext" aria-hidden="true">
+      <div class="row" data-dir="1">YOUTUBER ▶ BOYZ ▶ CLUB ▶ YOUTUBER ▶ BOYZ ▶ CLUB ▶ YOUTUBER ▶ BOYZ ▶ CLUB ▶</div>
+      <div class="row outline" data-dir="-1">ROBLOX ▶ МЕМЫ ▶ ШОРТСЫ ▶ ROBLOX ▶ МЕМЫ ▶ ШОРТСЫ ▶ ROBLOX ▶ МЕМЫ ▶ ШОРТСЫ ▶</div>
+    </div>
+
     <section id="members" class="section">
       <h2 class="reveal">Участники</h2>
       <div class="grid members" id="members-grid"></div>
     </section>
+
+    <div class="bigtext" aria-hidden="true">
+      <div class="row outline" data-dir="1">ЖМИ PLAY ▶ ПОДПИШИСЬ ▶ ЖМИ PLAY ▶ ПОДПИШИСЬ ▶ ЖМИ PLAY ▶ ПОДПИШИСЬ ▶</div>
+      <div class="row" data-dir="-1">НОКСИ ▶ RUMZIK ▶ НОКСИ ▶ RUMZIK ▶ НОКСИ ▶ RUMZIK ▶ НОКСИ ▶ RUMZIK ▶</div>
+    </div>
 
     <section id="videos" class="section">
       <h2 class="reveal">Самые популярные видео</h2>

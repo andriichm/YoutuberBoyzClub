@@ -7,14 +7,14 @@ const MEMBERS = [
     handle: "@Noksik_2011",
     role: "Ютубер · Roblox",
     channel: "https://www.youtube.com/@Noksik_2011",
-    avatar: "https://yt3.googleusercontent.com/h3pz6ilcwH1BYio9AWo3HI0bxtBls4R1uRSCgBh7YqvixbtJJgiwgO-EeGoLijbpF0cNFw_7bC0=s240-c-k-c0x00ffffff-no-rj",
+    avatar: "img/noksik.jpg",
   },
   {
     name: "Rumzik",
     handle: "@Rumzik906",
     role: "Ютубер · Roblox",
     channel: "https://www.youtube.com/@Rumzik906",
-    avatar: "https://yt3.googleusercontent.com/Q3CsTyv2GpbUa4hsVe8eyUplaDMLZMTVjpJS3K-KClovf7AhH6gFrM_esyFXx3gbJ_7f2vkamQ=s240-c-k-c0x00ffffff-no-rj",
+    avatar: "img/rumzik.jpg",
   },
 ];
 

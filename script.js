@@ -10,17 +10,56 @@ const viewsNum = (v) => parseFloat(String(v).replace(",", ".")) || 0;
   t.innerHTML = [...t.childNodes].map((n) => n.nodeType === 3 ? wrap(n.textContent) : `<b>${wrap(n.textContent)}</b>`).join("");
 })();
 
-// ===== Летающие кнопки play на фоне =====
+// ===== Живой фон: кнопки play летят и крутятся при прокрутке =====
+const bgIcons = [];
 (() => {
-  const box = $("#floaters");
-  const colors = ["#ff0000", "#ffffff", "#ffd21f"];
-  for (let k = 0; k < 16; k++) {
-    const i = document.createElement("i");
-    i.style.cssText = `left:${Math.random() * 100}%;--s:${20 + Math.random() * 50}px;--c:${colors[k % 3]};` +
-      `--d:${12 + Math.random() * 14}s;--delay:${-Math.random() * 20}s;--rot:${(Math.random() - .5) * 120}deg`;
-    box.appendChild(i);
+  const box = $("#bg");
+  const colors = ["#ff0000", "#ffffff", "#ffd21f", "#ff0000"];
+  const count = innerWidth < 720 ? 14 : 26;
+  for (let k = 0; k < count; k++) {
+    const depth = Math.random();                 // 0 — далеко, 1 — близко
+    const s = 18 + depth * 70;                   // ближние больше
+    const el = document.createElement("div");
+    el.className = "ic" + (k % 3 === 0 ? " line" : "");
+    const c = colors[k % colors.length];
+    el.style.cssText = `--s:${s}px;--c:${c};--o:${.08 + depth * .22};--tri:${k % 3 === 0 ? c : "#0f0f0f"};--d:${4 + Math.random() * 5}s`;
+    el.innerHTML = "<b></b>";
+    box.appendChild(el);
+    bgIcons.push({
+      el, x: Math.random() * 100, y: Math.random(),
+      speed: .15 + depth * .9,                   // ближние летят быстрее (параллакс)
+      spin: (Math.random() - .5) * .6,
+      sway: 20 + Math.random() * 60, phase: Math.random() * 6.28,
+    });
   }
 })();
+const blobs = document.querySelectorAll(".blob");
+const rows = document.querySelectorAll(".bigtext .row");
+
+let lastY = -1;
+function frame() {
+  const y = scrollY;
+  if (y !== lastY) {
+    lastY = y;
+    const vh = innerHeight + 160;
+    for (const p of bgIcons) {
+      const ty = ((p.y * vh - y * p.speed) % vh + vh) % vh - 80;
+      const tx = Math.sin(y / 300 + p.phase) * p.sway;
+      p.el.style.transform = `translate(calc(${p.x}vw + ${tx}px), ${ty}px) rotate(${y * p.spin}deg)`;
+    }
+    blobs[0].style.transform = `translate(${Math.sin(y / 600) * 15}vw, ${y * .15 % innerHeight}px)`;
+    blobs[1].style.transform = `translate(${Math.cos(y / 500) * -12}vw, ${-y * .1 % innerHeight}px)`;
+    rows.forEach((r) => {
+      const rect = r.getBoundingClientRect();
+      const off = (rect.top - innerHeight / 2) * .6 * Number(r.dataset.dir);
+      r.style.transform = `translateX(${off - 200}px)`;
+    });
+    const h = document.documentElement;
+    $("#progress").style.width = (y / (h.scrollHeight - h.clientHeight) * 100) + "%";
+  }
+  requestAnimationFrame(frame);
+}
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches) requestAnimationFrame(frame);
 
 // ===== Бегущая строка (дублируем для бесконечной прокрутки) =====
 $("#ticker").innerHTML = [...TICKER, ...TICKER, ...TICKER, ...TICKER].map((w) => `<span>${esc(w)}</span>`).join("");
@@ -32,7 +71,7 @@ $("#members-grid").innerHTML = MEMBERS.map((m) => {
   <article class="member reveal">
     <div class="avatar-wrap">
       ${m.avatar
-        ? `<img class="avatar" src="${esc(m.avatar)}" alt="${esc(m.name)}" referrerpolicy="no-referrer">`
+        ? `<img class="avatar" src="${esc(m.avatar)}" alt="${esc(m.name)}">`
         : `<div class="avatar">${esc(m.name.trim()[0] || "?")}</div>`}
     </div>
     <h3>${esc(m.name)}</h3>
@@ -115,11 +154,6 @@ const io = new IntersectionObserver((entries) => entries.forEach((en) => {
 }), { threshold: 0.12 });
 document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
-// ===== Полоска прогресса прокрутки =====
-addEventListener("scroll", () => {
-  const h = document.documentElement;
-  $("#progress").style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + "%";
-}, { passive: true });
 
 // ===== Мобильное меню =====
 const burger = $(".burger"), links = $(".links");

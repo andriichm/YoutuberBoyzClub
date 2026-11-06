@@ -101,22 +101,45 @@ h3 { font-weight: 900; }
   padding: clamp(70px, 11vw, 120px) 16px 90px;
   background: radial-gradient(ellipse at 50% 0%, rgba(255, 0, 0, .16), transparent 60%);
 }
-.floaters { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
-.floaters i {
-  position: absolute; bottom: -60px; width: var(--s); height: calc(var(--s) * .7);
-  background: var(--c); border-radius: 28% / 40%; opacity: .14;
-  animation: rise var(--d) linear infinite; animation-delay: var(--delay);
+/* ===== Живой фон на всю страницу (двигается при прокрутке) ===== */
+.bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.nav, main, .footer { position: relative; z-index: 1; }
+.nav { z-index: 20; }
+.bg .ic {
+  position: absolute; left: 0; top: 0; will-change: transform;
+  width: var(--s); height: calc(var(--s) * .7);
 }
-.floaters i::after {
+.bg .ic > b {
+  position: absolute; inset: 0; border-radius: 28% / 40%;
+  background: var(--c); opacity: var(--o);
+  animation: drift var(--d) ease-in-out infinite alternate;
+}
+.bg .ic.line > b { background: transparent; border: 3px solid var(--c); }
+.bg .ic > b::after {
   content: ""; position: absolute; top: 50%; left: 54%; transform: translate(-50%, -50%);
-  border-left: calc(var(--s) * .22) solid var(--bg);
+  border-left: calc(var(--s) * .22) solid var(--tri);
   border-top: calc(var(--s) * .13) solid transparent; border-bottom: calc(var(--s) * .13) solid transparent;
 }
-@keyframes rise {
-  from { transform: translateY(0) rotate(0); }
-  to { transform: translateY(calc(-100vh - 120px)) rotate(var(--rot)); }
+@keyframes drift {
+  from { transform: translate(0, 0) rotate(-8deg); }
+  to { transform: translate(18px, -24px) rotate(10deg); }
 }
-.hero > *:not(.floaters) { position: relative; z-index: 1; }
+.blob {
+  position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 0, 0, .13), transparent 65%);
+  will-change: transform;
+}
+.b1 { left: -20vmax; top: -20vmax; }
+.b2 { right: -25vmax; top: 40vh; background: radial-gradient(circle, rgba(255, 210, 31, .06), transparent 65%); }
+
+/* Огромные надписи, которые разъезжаются при прокрутке */
+.bigtext { overflow: hidden; padding: 40px 0 10px; user-select: none; }
+.bigtext .row {
+  font-family: "Rubik Mono One"; white-space: nowrap; line-height: 1.1;
+  font-size: clamp(3rem, 10vw, 8rem); color: rgba(255, 255, 255, .05);
+  will-change: transform;
+}
+.bigtext .row.outline { color: transparent; -webkit-text-stroke: 2px rgba(255, 0, 0, .35); }
 
 .title { font-size: clamp(2rem, 7.5vw, 5rem); line-height: 1.1; margin-bottom: 18px; }
 .title .ch { display: inline-block; opacity: 0; transform: translateY(40px) rotate(8deg); animation: drop .6s cubic-bezier(.3, 1.6, .5, 1) forwards; }
