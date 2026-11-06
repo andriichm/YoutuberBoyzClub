@@ -84,6 +84,15 @@ h3 { font-weight: 900; }
 .links a:hover { color: var(--text); }
 .links a:hover::after { transform: scaleX(1); }
 .burger { display: none; background: none; border: 0; color: var(--text); font-size: 1.6rem; cursor: pointer; }
+.nav-right { display: flex; align-items: center; gap: 12px; order: 3; }
+.sound {
+  width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--line); cursor: pointer;
+  background: var(--bg2); font-size: 1.1rem; display: grid; place-items: center;
+  transition: border-color .2s, transform .2s cubic-bezier(.3, 1.6, .5, 1), background .2s;
+}
+.sound:hover { transform: scale(1.1); border-color: var(--red); }
+.sound.on { background: var(--red); border-color: var(--red); animation: soundOn .4s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes soundOn { 0% { transform: scale(.7); } 100% { transform: scale(1); } }
 
 /* ===== Buttons ===== */
 .btn {
@@ -330,6 +339,9 @@ article:hover .i-team .left, article:hover .i-team .right, article:hover .i-team
   .vmeta { padding: 10px 12px 12px; }
   .vmeta h3 { font-size: .85rem; }
   .logo { font-size: .85rem; }
+  .nav .logo { font-size: .72rem; gap: 8px; min-width: 0; }
+  .nav-right { gap: 8px; }
+  .sound { width: 36px; height: 36px; font-size: 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

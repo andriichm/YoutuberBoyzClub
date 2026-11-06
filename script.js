@@ -155,6 +155,59 @@ const io = new IntersectionObserver((entries) => entries.forEach((en) => {
 document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
 
+// ===== Звуки кнопок (по умолчанию выключены) =====
+const Sound = (() => {
+  let on = false, ctx = null;
+  try { on = localStorage.getItem("ybc-sound") === "1"; } catch (e) {}
+  const btn = $("#sound");
+  const paint = () => {
+    btn.textContent = on ? "🔊" : "🔇";
+    btn.classList.toggle("on", on);
+    btn.setAttribute("aria-pressed", on);
+    btn.setAttribute("aria-label", on ? "Выключить звук" : "Включить звук");
+  };
+  const ac = () => (ctx = ctx || new (window.AudioContext || window.webkitAudioContext)());
+
+  // Короткий тон с быстрым затуханием
+  function tone(freq, dur, type = "square", vol = .08, slideTo = null, delay = 0) {
+    const a = ac(), t = a.currentTime + delay;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(a.destination);
+    o.start(t); o.stop(t + dur + .02);
+  }
+  const sounds = {
+    click: () => tone(900, .05, "square", .05, 500),                       // обычный щелчок
+    pop:   () => { tone(220, .12, "sine", .25, 880); tone(1320, .08, "triangle", .06, null, .06); }, // большая кнопка play
+    play:  () => { tone(520, .07, "triangle", .12); tone(780, .1, "triangle", .12, null, .07); },      // запуск видео
+    chip:  () => tone(1200, .035, "sine", .08),                            // фильтр
+    on:    () => { tone(660, .08, "sine", .12); tone(990, .12, "sine", .12, null, .08); },             // звук включён
+  };
+  function play(name) { if (!on) return; try { sounds[name](); } catch (e) {} }
+
+  btn.addEventListener("click", () => {
+    on = !on;
+    try { localStorage.setItem("ybc-sound", on ? "1" : "0"); } catch (e) {}
+    paint();
+    if (on) { ac().resume(); play("on"); }
+  });
+  paint();
+
+  // Какой звук для какого элемента
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("#sound")) return;
+    if (e.target.closest(".play-big")) play("pop");
+    else if (e.target.closest(".frame")) play("play");
+    else if (e.target.closest(".chip")) play("chip");
+    else if (e.target.closest("a, button")) play("click");
+  });
+  return { play };
+})();
+
 // ===== Мобильное меню =====
 const burger = $(".burger"), links = $(".links");
 burger.addEventListener("click", () => {
