@@ -233,16 +233,23 @@ const Sound = (() => {
     },
   };
   // рост чисел: тик, который поднимается по высоте вместе с числом (p — от 0 до 1)
-  sounds.tick = (p) => tone(300 + p * 1300, .03, "square", .035);
-  // число досчиталось: звонкое «динь-динь»
-  sounds.done = () => { tone(1568, .25, "triangle", .08); tone(2093, .35, "triangle", .07, null, .09); };
+  sounds.tick = (p) => {
+    const f = 420 + p * 1400;
+    tone(f, .06, "square", .1);                 // основной «тик» монетки
+    tone(f * 1.5, .04, "triangle", .07);        // звонкий призвук
+  };
+  // число досчиталось: громкое «динь-динь-ДИНЬ»
+  sounds.done = () => {
+    [1319, 1568, 2093].forEach((f, i) => tone(f, .3, "triangle", .14, null, i * .09));
+    tone(2637, .5, "sine", .08, null, .27);
+  };
 
   let lastHover = 0, lastTick = 0;
   function play(name, arg) {
     if (!on) return;
     const n = performance.now();
     if (name === "hover") { if (n - lastHover < 120) return; lastHover = n; }
-    if (name === "tick") { if (n - lastTick < 45) return; lastTick = n; }
+    if (name === "tick") { if (n - lastTick < 60) return; lastTick = n; }
     try { const a = ac(); if (a.state === "suspended") a.resume(); sounds[name](arg); } catch (e) {}
   }
   document.addEventListener("mouseover", (e) => {
@@ -321,13 +328,14 @@ if (matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(pr
     pct.classList.add("ready");
     btn.classList.add("full", "ready");
     loader.classList.add("ready");
+    // click/keydown — события, которые браузер точно считает «разрешением на звук» (и на телефоне тоже)
     const go = (e) => {
-      if (e.type === "keydown" && e.key === "Tab") return;
-      loader.removeEventListener("pointerdown", go);
+      if (e.type === "keydown" && (e.key === "Tab" || e.key === "Escape")) return;
+      loader.removeEventListener("click", go);
       removeEventListener("keydown", go);
       explode();
     };
-    loader.addEventListener("pointerdown", go);
+    loader.addEventListener("click", go);
     addEventListener("keydown", go);
   }
 
