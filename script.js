@@ -234,8 +234,20 @@ const Sound = (() => {
   };
   // рост чисел: тик, который поднимается по высоте вместе с числом (p — от 0 до 1)
   // вариант тика выбирается в data.js (TICK_SOUND), сами варианты — в ticks.js
+  // "random" — при каждом заходе случайный из 8 вариантов (один на весь подсчёт)
+  const tickKey = (() => {
+    const want = typeof TICK_SOUND !== "undefined" ? TICK_SOUND : "random";
+    if (typeof TICKS === "undefined") return null;
+    if (want !== "random" && TICKS[want]) return want;
+    let prev = null;
+    try { prev = localStorage.getItem("ybc-tick"); } catch (e) {}
+    const keys = Object.keys(TICKS).filter((k) => k !== prev);   // не повторяем прошлый раз
+    const pick = keys[Math.floor(Math.random() * keys.length)];
+    try { localStorage.setItem("ybc-tick", pick); } catch (e) {}
+    return pick;
+  })();
   sounds.tick = (p) => {
-    const t = (typeof TICKS !== "undefined" && TICKS[typeof TICK_SOUND !== "undefined" ? TICK_SOUND : "coin"]) || null;
+    const t = tickKey ? TICKS[tickKey] : null;
     if (t) t.play(tone, noise, p);
     else { const f = 420 + p * 1400; tone(f, .06, "square", .1); tone(f * 1.5, .04, "triangle", .07); }
   };
@@ -274,7 +286,7 @@ const Sound = (() => {
     else if (e.target.closest(".chip")) play("chip");
     else if (e.target.closest("a, button")) play("click");
   });
-  return { play };
+  return { play, tickKey };
 })();
 
 // ===== 3D-наклон карточек за мышкой =====

@@ -34,7 +34,7 @@
 <body>
   <div class="wrap">
     <h1>Звуки <b>тика</b></h1>
-    <p class="sub">Нажмите на карточку: счётчик досчитает до 527 с этим звуком. Выберите понравившийся и напишите его название.</p>
+    <p class="sub">На сайте при каждом заходе звучит случайный из этих звуков. Нажмите на карточку: счётчик досчитает до 527 с этим звуком. Выберите понравившийся и напишите его название.</p>
     <div class="grid" id="grid"></div>
     <p class="sub" style="margin-top:30px"><a href="./">← На сайт</a></p>
   </div>
@@ -61,7 +61,7 @@
     }
     const done = () => { [1319, 1568, 2093].forEach((f, i) => tone(f, .3, "triangle", .14, null, i * .09)); tone(2637, .5, "sine", .08, null, .27); };
 
-    const current = typeof TICK_SOUND !== "undefined" ? TICK_SOUND : "coin";
+    const current = typeof TICK_SOUND !== "undefined" ? TICK_SOUND : "random";
     const grid = document.getElementById("grid");
     Object.entries(TICKS).forEach(([key, t], i) => {
       const b = document.createElement("button");
