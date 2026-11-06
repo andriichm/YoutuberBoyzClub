@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Звуки тика · YoutuberBoyzClub</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #0f0f0f; --card: #1d1d1d; --line: #2c2c2c; --text: #fff; --muted: #b3b3b3; --red: #ff0000; --yellow: #ffd21f; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: "Rubik", system-ui, sans-serif; padding: 40px 16px 60px; }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    h1 { font-family: "Rubik Mono One", sans-serif; font-weight: 400; font-size: clamp(1.3rem, 4vw, 2rem); }
+    h1 b { color: var(--red); font-weight: 400; }
+    .sub { color: var(--muted); margin: 10px 0 30px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 20px; cursor: pointer;
+      text-align: left; color: inherit; font: inherit; transition: border-color .2s, transform .2s;
+    }
+    .card:hover { border-color: var(--red); transform: translateY(-3px); }
+    .card.playing { border-color: var(--yellow); }
+    .num { font-family: "Rubik Mono One", sans-serif; font-size: 2rem; color: var(--yellow); }
+    .card h2 { font-size: 1.1rem; margin: 8px 0 4px; }
+    .card p { color: var(--muted); font-size: .9rem; }
+    .key { display: inline-block; margin-top: 10px; padding: 2px 8px; border-radius: 6px; background: #2a2a2a; color: var(--muted); font-size: .8rem; font-family: monospace; }
+    .now { margin-top: 10px; display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 6px; background: var(--red); font-size: .8rem; font-weight: 700; }
+    a { color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Звуки <b>тика</b></h1>
+    <p class="sub">Нажмите на карточку: счётчик досчитает до 527 с этим звуком. Выберите понравившийся и напишите его название.</p>
+    <div class="grid" id="grid"></div>
+    <p class="sub" style="margin-top:30px"><a href="./">← На сайт</a></p>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="ticks.js"></script>
+  <script>
+    let ctx;
+    const ac = () => (ctx = ctx || new (window.AudioContext || window.webkitAudioContext)());
+    function tone(freq, dur, type = "square", vol = .08, slideTo = null, delay = 0) {
+      const a = ac(), t = a.currentTime + delay, o = a.createOscillator(), g = a.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + .02);
+    }
+    function noise(dur, vol = .2, from = 4000, to = 200, delay = 0) {
+      const a = ac(), t = a.currentTime + delay, buf = a.createBuffer(1, Math.ceil(a.sampleRate * dur), a.sampleRate);
+      const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+      s.buffer = buf; f.type = "lowpass"; f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t + dur);
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      s.connect(f).connect(g).connect(a.destination); s.start(t);
+    }
+    const done = () => { [1319, 1568, 2093].forEach((f, i) => tone(f, .3, "triangle", .14, null, i * .09)); tone(2637, .5, "sine", .08, null, .27); };
+
+    const current = typeof TICK_SOUND !== "undefined" ? TICK_SOUND : "coin";
+    const grid = document.getElementById("grid");
+    Object.entries(TICKS).forEach(([key, t], i) => {
+      const b = document.createElement("button");
+      b.className = "card";
+      b.innerHTML = `<div class="num">0</div><h2>${i + 1}. ${t.name}</h2><p>${t.desc}</p>` +
+        `<span class="key">${key}</span>${key === current ? '<span class="now">сейчас на сайте</span>' : ""}`;
+      b.addEventListener("click", () => run(b, t));
+      grid.appendChild(b);
+    });
+
+    let timer = null;
+    function run(card, t) {
+      ac().resume();
+      document.querySelectorAll(".card").forEach((c) => { c.classList.remove("playing"); c.querySelector(".num").textContent = "0"; });
+      cancelAnimationFrame(timer);
+      card.classList.add("playing");
+      const num = card.querySelector(".num"), target = 527, dur = 3200, start = performance.now();
+      let shown = -1, last = 0;
+      const step = (now) => {
+        const p = Math.min((now - start) / dur, 1), v = Math.round(target * (1 - Math.pow(1 - p, 2)));
+        if (v !== shown) {
+          shown = v; num.textContent = v;
+          if (p < 1 && now - last >= 60) { last = now; t.play(tone, noise, v / target); }
+        }
+        if (p < 1) timer = requestAnimationFrame(step); else { done(); card.classList.remove("playing"); }
+      };
+      timer = requestAnimationFrame(step);
+    }
+  </script>
+</body>
+</html>

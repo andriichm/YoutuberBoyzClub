@@ -40,3 +40,7 @@ const SOCIALS = {
   discord: "",
   tiktok: "",
 };
+
+// Звук тика у счётчиков. Варианты: coin, odometer, xylo, bubble, laser, wheel, scanner, drop
+// (послушать все можно на странице ticks.html).
+const TICK_SOUND = "coin";

@@ -233,10 +233,11 @@ const Sound = (() => {
     },
   };
   // рост чисел: тик, который поднимается по высоте вместе с числом (p — от 0 до 1)
+  // вариант тика выбирается в data.js (TICK_SOUND), сами варианты — в ticks.js
   sounds.tick = (p) => {
-    const f = 420 + p * 1400;
-    tone(f, .06, "square", .1);                 // основной «тик» монетки
-    tone(f * 1.5, .04, "triangle", .07);        // звонкий призвук
+    const t = (typeof TICKS !== "undefined" && TICKS[typeof TICK_SOUND !== "undefined" ? TICK_SOUND : "coin"]) || null;
+    if (t) t.play(tone, noise, p);
+    else { const f = 420 + p * 1400; tone(f, .06, "square", .1); tone(f * 1.5, .04, "triangle", .07); }
   };
   // число досчиталось: громкое «динь-динь-ДИНЬ»
   sounds.done = () => {
@@ -324,7 +325,7 @@ if (matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(pr
     if (isReady) return;
     isReady = true;
     fill.style.width = "100%";
-    pct.textContent = "НАЖМИ ▶";
+    pct.textContent = "PRESS PLAY ▶";
     pct.classList.add("ready");
     btn.classList.add("full", "ready");
     loader.classList.add("ready");
