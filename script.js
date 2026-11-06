@@ -146,7 +146,9 @@ function countUp(el, target) {
   };
   requestAnimationFrame(tick);
 }
-setTimeout(() => document.querySelectorAll("[data-count]").forEach((el) => countUp(el, totals[el.dataset.count] || 0)), 600);
+function startCounters() {
+  setTimeout(() => document.querySelectorAll("[data-count]").forEach((el) => countUp(el, totals[el.dataset.count] || 0)), 500);
+}
 
 // ===== Появление блоков при прокрутке =====
 const io = new IntersectionObserver((entries) => entries.forEach((en) => {
@@ -180,14 +182,56 @@ const Sound = (() => {
     o.connect(g).connect(a.destination);
     o.start(t); o.stop(t + dur + .02);
   }
+  // Шум (для «пыха» и взрыва)
+  function noise(dur, vol = .2, from = 4000, to = 200, delay = 0) {
+    const a = ac(), t = a.currentTime + delay;
+    const buf = a.createBuffer(1, Math.ceil(a.sampleRate * dur), a.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+    src.buffer = buf; f.type = "lowpass";
+    f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    src.connect(f).connect(g).connect(a.destination);
+    src.start(t);
+  }
+  // Пентатоника — любые ноты из неё звучат вместе красиво
+  const PENTA = [523, 587, 659, 784, 880, 1047, 1175, 1319];
+  const rnd = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
   const sounds = {
-    click: () => tone(900, .05, "square", .05, 500),                       // обычный щелчок
-    pop:   () => { tone(220, .12, "sine", .25, 880); tone(1320, .08, "triangle", .06, null, .06); }, // большая кнопка play
-    play:  () => { tone(520, .07, "triangle", .12); tone(780, .1, "triangle", .12, null, .07); },      // запуск видео
-    chip:  () => tone(1200, .035, "sine", .08),                            // фильтр
-    on:    () => { tone(660, .08, "sine", .12); tone(990, .12, "sine", .12, null, .08); },             // звук включён
+    // обычный щелчок: «блип» каждый раз чуть другой высоты
+    click: () => { const f = rnd(PENTA); tone(f, .06, "square", .045, f * .6); noise(.02, .05, 6000, 2000); },
+    // большая кнопка play: «буль» + звёздное арпеджио вверх
+    pop: () => {
+      tone(180, .15, "sine", .35, 900);
+      [1047, 1319, 1568, 2093].forEach((f, i) => tone(f, .12, "triangle", .07, null, .08 + i * .055));
+    },
+    // запуск видео: ретро «монетка»
+    play: () => { tone(988, .08, "square", .07); tone(1319, .25, "square", .07, null, .08); },
+    // фильтры: ксилофон
+    chip: () => { const f = rnd(PENTA); tone(f, .18, "sine", .12); tone(f * 2, .08, "sine", .04); },
+    // наведение на карточку: еле слышный «тинь»
+    hover: () => tone(rnd(PENTA) * 2, .09, "sine", .025),
+    // звук включён: мажорное «та-да»
+    on: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .16, "triangle", .1, null, i * .07)),
+    // экран загрузки: «бум» + искры
+    boom: () => {
+      noise(.6, .35, 3000, 80);
+      tone(120, .45, "sine", .4, 40);
+      [1568, 2093, 2637].forEach((f, i) => tone(f, .1, "triangle", .04, null, .1 + i * .07));
+    },
   };
-  function play(name) { if (!on) return; try { sounds[name](); } catch (e) {} }
+  let lastHover = 0;
+  function play(name) {
+    if (!on) return;
+    if (name === "hover") { const n = performance.now(); if (n - lastHover < 120) return; lastHover = n; }
+    try { const a = ac(); if (a.state === "suspended") a.resume(); sounds[name](); } catch (e) {}
+  }
+  document.addEventListener("mouseover", (e) => {
+    const c = e.target.closest(".tilt");
+    if (c && !c.contains(e.relatedTarget)) play("hover");
+  });
 
   btn.addEventListener("click", () => {
     on = !on;
@@ -206,6 +250,91 @@ const Sound = (() => {
     else if (e.target.closest("a, button")) play("click");
   });
   return { play };
+})();
+
+// ===== 3D-наклон карточек за мышкой =====
+if (matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  document.querySelectorAll(".video, .member, .features article").forEach((card) => {
+    card.classList.add("tilt");
+    const glare = document.createElement("div");
+    glare.className = "glare";
+    card.appendChild(glare);
+    const max = card.classList.contains("video") ? 14 : 10;   // градусов
+    card.addEventListener("mousemove", (e) => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+      card.classList.add("tilting");
+      card.style.transform = `perspective(800px) rotateX(${(.5 - py) * max * 2}deg) rotateY(${(px - .5) * max * 2}deg) scale(1.04)`;
+      card.style.setProperty("--gx", px * 100 + "%");
+      card.style.setProperty("--gy", py * 100 + "%");
+    });
+    card.addEventListener("mouseleave", () => {
+      card.classList.remove("tilting");
+      card.style.transform = "";
+    });
+  });
+}
+
+// ===== Экран загрузки: кнопка заполняется красным и разлетается =====
+(() => {
+  const loader = $("#loader"), btn = $("#lbtn"), fill = $("#lfill"), pct = $("#lpct");
+  const start = performance.now(), dur = 1300;
+  let pageLoaded = document.readyState === "complete";
+  addEventListener("load", () => { pageLoaded = true; });
+
+  function step(now) {
+    let p = Math.min((now - start) / dur, 1);
+    if (!pageLoaded && p > .9) p = .9 + (p - .9) * .1;       // ждём, пока страница реально загрузится
+    if (now - start > 4000) pageLoaded = true;                // но не дольше 4 секунд
+    const eased = 1 - Math.pow(1 - p, 2);
+    fill.style.width = eased * 100 + "%";
+    pct.textContent = Math.round(eased * 100) + "%";
+    if (p < 1 || !pageLoaded) requestAnimationFrame(step);
+    else explode();
+  }
+
+  let exploded = false, finished = false;
+  function finish() {
+    if (finished) return;
+    finished = true;
+    loader.classList.add("done");
+    document.body.classList.remove("loading");
+    startCounters();
+    setTimeout(() => loader.remove(), 600);
+  }
+  // Страховка: даже если анимации заморожены (фоновая вкладка), сайт откроется
+  setTimeout(finish, 4500);
+
+  function explode() {
+    if (exploded) return;
+    exploded = true;
+    fill.style.width = "100%"; pct.textContent = "100%";
+    btn.classList.add("full");
+    setTimeout(() => {
+      loader.classList.add("exploding");
+      btn.classList.add("boom");
+      Sound.play("boom");
+      const flash = document.createElement("div"); flash.className = "flash"; document.body.appendChild(flash);
+      const colors = ["#ff0000", "#ff0000", "#ffffff", "#ffd21f"];
+      for (let i = 0; i < 34; i++) {
+        const s = document.createElement("div");
+        const a = Math.random() * Math.PI * 2, d = 160 + Math.random() * Math.max(innerWidth, innerHeight) * .55;
+        const size = 8 + Math.random() * 26;
+        s.className = "shard";
+        s.style.cssText = `--x:${Math.cos(a) * d}px;--y:${Math.sin(a) * d}px;--rot:${(Math.random() - .5) * 720}deg;` +
+          `--w:${size}px;--h:${size * (.5 + Math.random() * .6)}px;--c:${colors[i % 4]};--r:${i % 3 ? "30% / 40%" : "50%"};` +
+          `animation-delay:${Math.random() * .06}s`;
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 1100);
+      }
+      setTimeout(() => flash.remove(), 600);
+      setTimeout(finish, 280);
+    }, 220);
+  }
+
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    finish();
+  } else requestAnimationFrame(step);
 })();
 
 // ===== Мобильное меню =====

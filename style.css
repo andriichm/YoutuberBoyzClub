@@ -24,6 +24,51 @@ a { color: inherit; text-decoration: none; }
 h1, h2, .logo, .stats strong { font-family: "Rubik Mono One", "Rubik", sans-serif; font-weight: 400; }
 h3 { font-weight: 900; }
 
+/* ===== Экран загрузки ===== */
+.loader {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; align-content: center; gap: 22px;
+  background: var(--bg); transition: opacity .5s ease, visibility .5s;
+  animation: loaderFailsafe 0s 5s forwards;          /* на всякий случай, если JS не загрузится */
+}
+@keyframes loaderFailsafe { to { opacity: 0; visibility: hidden; } }
+.loader.done { opacity: 0; visibility: hidden; }
+.lbtn {
+  position: relative; width: 150px; height: 105px; border-radius: 28% / 40%;
+  border: 4px solid #fff; overflow: hidden; animation: lbtnIn .5s cubic-bezier(.3, 1.6, .5, 1);
+  transition: transform .35s cubic-bezier(.5, -0.6, .7, 1.4), opacity .3s;
+}
+@keyframes lbtnIn { from { transform: scale(.3) rotate(-20deg); opacity: 0; } }
+.lbtn .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--red); }
+.lbtn .fill::after {                                /* бегущий блик по заливке */
+  content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 30px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .45));
+}
+.lbtn .tri {
+  position: absolute; top: 50%; left: 54%; transform: translate(-50%, -50%);
+  border-left: 34px solid #fff; border-top: 20px solid transparent; border-bottom: 20px solid transparent;
+}
+.lbtn.full { border-color: var(--red); transform: scale(1.15); }
+.lbtn.boom { transform: scale(2.6); opacity: 0; }
+.lpct { font-family: "Rubik Mono One", sans-serif; color: var(--muted); font-size: .95rem; letter-spacing: 2px; transition: opacity .2s; }
+.loader.exploding .lpct { opacity: 0; }
+.shard {
+  position: fixed; left: 50%; top: 50%; z-index: 101; pointer-events: none;
+  width: var(--w); height: var(--h); margin: calc(var(--h) / -2) 0 0 calc(var(--w) / -2);
+  background: var(--c); border-radius: var(--r);
+  animation: shard .9s cubic-bezier(.15, .7, .3, 1) forwards;
+}
+@keyframes shard {
+  0% { transform: translate(0, 0) rotate(0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--x), var(--y)) rotate(var(--rot)) scale(.4); opacity: 0; }
+}
+.flash {
+  position: fixed; left: 50%; top: 50%; z-index: 101; width: 40px; height: 40px; margin: -20px 0 0 -20px;
+  border-radius: 50%; background: #fff; pointer-events: none; animation: flash .5s ease-out forwards;
+}
+@keyframes flash { from { transform: scale(0); opacity: .9; } to { transform: scale(30); opacity: 0; } }
+body.loading { overflow: hidden; }
+body.loading .title .ch, body.loading .play-big { animation-play-state: paused; }
+
 /* ===== Scroll progress (как полоска загрузки YouTube) ===== */
 .progress {
   position: fixed; top: 0; left: 0; height: 3px; width: 0; z-index: 50;
@@ -207,7 +252,7 @@ h3 { font-weight: 900; }
   background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
   transition: transform .3s cubic-bezier(.3, 1.4, .5, 1), border-color .3s, box-shadow .3s;
 }
-.features article { padding: 28px; }
+.features article { padding: 28px; position: relative; }
 .features article:hover, .member:hover { transform: translateY(-6px) rotate(-1deg); border-color: var(--red); box-shadow: 0 16px 40px rgba(0, 0, 0, .5); }
 /* ===== Свои иконки ===== */
 .icon { width: 84px; height: 84px; margin-bottom: 12px; display: block; overflow: visible; }
@@ -312,6 +357,19 @@ article:hover .i-team .left, article:hover .i-team .right, article:hover .i-team
 .vmeta { padding: 14px 16px 16px; }
 .vmeta h3 { font-size: .95rem; font-weight: 500; line-height: 1.35; }
 .vmeta p { color: var(--muted); font-size: .82rem; margin-top: 6px; }
+
+/* ===== 3D-наклон карточек за мышкой ===== */
+.tilt { transform-style: preserve-3d; will-change: transform; }
+.tilt.tilting { transition: transform .08s linear, border-color .3s, box-shadow .3s !important; transition-delay: 0s !important; }
+.tilt .glare {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: inherit;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, .22), transparent 55%);
+  opacity: 0; transition: opacity .3s;
+}
+.tilt.tilting .glare { opacity: 1; }
+.tilt.tilting .badge, .tilt.tilting .avatar-wrap { transform: translateZ(40px); }
+.tilt.tilting .vmeta, .tilt.tilting h3 { transform: translateZ(25px); }
+.badge, .avatar-wrap, .vmeta, .member h3 { transition: transform .3s; }
 
 /* ===== Reveal on scroll ===== */
 .reveal { opacity: 0; transform: translateY(36px); transition: opacity .7s ease, transform .7s cubic-bezier(.2, 1, .3, 1); }
