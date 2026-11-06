@@ -138,10 +138,10 @@ const totals = {
   VIEWS: Math.round(VIDEOS.reduce((s, v) => s + viewsNum(v.views), 0)),
 };
 function countUp(el, target) {
-  const start = performance.now(), dur = 1400;
+  const start = performance.now(), dur = 3200;
   const tick = (now) => {
     const p = Math.min((now - start) / dur, 1);
-    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 2)));
     if (p < 1) requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
