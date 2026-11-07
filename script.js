@@ -389,7 +389,7 @@ const Sound = (() => {
     Sound.play("chaos");
     let left = 10;
     const tick = () => {
-      toast.textContent = `😈 ${left}`;
+      toast.textContent = `${left}`;
       if (left-- <= 0) {
         html.classList.remove("chaos");
         toast.classList.add("bye");
