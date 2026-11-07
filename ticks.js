@@ -26,11 +26,6 @@ const TICKS = {
     desc: "Мягкое «буль-буль»",
     play: (tone, noise, p) => { const f = 300 + p * 500; tone(f, .07, "sine", .22, f * 2.4); },
   },
-  laser: {
-    name: "Лазер «пиу»",
-    desc: "Как выстрелы в аркаде",
-    play: (tone, noise, p) => { const f = 1600 + p * 800; tone(f, .07, "square", .07, f / 4); },
-  },
   wheel: {
     name: "Колесо удачи",
     desc: "Пластиковое «тр-р-р», как у барабана с призами",
@@ -40,10 +35,5 @@ const TICKS = {
     name: "Сканер на кассе",
     desc: "Короткие одинаковые «бип»",
     play: (tone, noise, p) => tone(1900, .04, "sine", .12),
-  },
-  drop: {
-    name: "Капли воды",
-    desc: "Звонкие капли «плюм»",
-    play: (tone, noise, p) => { const f = 1400 + Math.random() * 900; tone(f, .09, "sine", .18, f / 3); },
   },
 };

@@ -41,6 +41,6 @@ const SOCIALS = {
   tiktok: "",
 };
 
-// Звук тика у счётчиков. "random" — каждый заход случайный. Или один из: coin, odometer, xylo, bubble, laser, wheel, scanner, drop
+// Звук тика у счётчиков. "random" — каждый заход случайный. Или один из: coin, odometer, xylo, bubble, wheel, scanner
 // (послушать все можно на странице ticks.html).
 const TICK_SOUND = "random";
