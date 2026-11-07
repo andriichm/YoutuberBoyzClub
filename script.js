@@ -317,7 +317,7 @@ const Sound = (() => {
 // ===== ПАСХАЛКА 1: 10 нажатий на большую кнопку play → конфетти и фанфары =====
 (() => {
   const big = $(".play-big");
-  const combo = document.createElement("span");
+  const combo = document.createElement("b");     // не span — иначе подхватит стили самой кнопки
   combo.className = "combo";
   big.appendChild(combo);
   let count = 0, timer = null;
