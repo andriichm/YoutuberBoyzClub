@@ -257,6 +257,31 @@ const Sound = (() => {
     tone(2637, .5, "sine", .08, null, .27);
   };
 
+  // фанфары: «та-та-та-ТААА» медью (пила + квадрат)
+  sounds.fanfare = () => {
+    const brass = (f, d, dl, v = .07) => { tone(f, d, "sawtooth", v, null, dl); tone(f * 2, d, "square", v * .3, null, dl); };
+    brass(392, .14, 0); brass(392, .14, .16); brass(392, .14, .32);
+    brass(523, .5, .48, .09);
+    brass(466, .14, 1.0); brass(523, .14, 1.16);
+    [523, 659, 784, 1047].forEach((f) => brass(f, 1.1, 1.32, .05));     // финальный аккорд
+    [2093, 2637, 3136].forEach((f, i) => tone(f, .2, "triangle", .04, null, 1.4 + i * .1));
+  };
+  // режим хаоса: 10 секунд бита — бочка, хэт и безумные «блипы»
+  sounds.chaos = () => {
+    const a = ac();
+    for (let i = 0; i < 40; i++) {
+      const t = i * .25;
+      if (i % 2 === 0) tone(150, .18, "sine", .35, 40, t);                    // бочка
+      noise(.04, .12, 9000, 5000, t + .125);                                   // хэт
+      if (i % 4 === 3) noise(.12, .2, 2500, 400, t);                           // хлопок
+      const f = rnd(PENTA) * (Math.random() < .5 ? 1 : 2);
+      tone(f, .1, Math.random() < .5 ? "square" : "sawtooth", .04, Math.random() < .3 ? f * 3 : null, t + .06);
+    }
+    tone(200, .6, "sawtooth", .08, 1600, 0);                                   // сирена на старте
+  };
+  // мини-звук комбо (каждое нажатие на большую кнопку выше)
+  sounds.combo = (n) => tone(300 + n * 90, .08, "square", .08, (300 + n * 90) * 1.5);
+
   let lastHover = 0, lastTick = 0;
   function play(name, arg) {
     if (!on) return;
@@ -281,12 +306,101 @@ const Sound = (() => {
   // Какой звук для какого элемента
   document.addEventListener("click", (e) => {
     if (e.target.closest("#sound")) return;
-    if (e.target.closest(".play-big")) play("pop");
+    if (e.target.closest(".play-big")) return;          // у большой кнопки свои звуки (комбо)
     else if (e.target.closest(".frame")) play("play");
     else if (e.target.closest(".chip")) play("chip");
     else if (e.target.closest("a, button")) play("click");
   });
   return { play, tickKey };
+})();
+
+// ===== ПАСХАЛКА 1: 10 нажатий на большую кнопку play → конфетти и фанфары =====
+(() => {
+  const big = $(".play-big");
+  const combo = document.createElement("span");
+  combo.className = "combo";
+  big.appendChild(combo);
+  let count = 0, timer = null;
+
+  big.addEventListener("click", (e) => {
+    e.preventDefault();
+    clearTimeout(timer);
+    count++;
+    if (count >= 10) {
+      count = 0;
+      combo.textContent = "🎉";
+      combo.classList.remove("pop"); void combo.offsetWidth; combo.classList.add("pop");
+      confetti();
+      Sound.play("fanfare");
+      return;
+    }
+    Sound.play(count === 1 ? "pop" : "combo", count);
+    if (count > 1) {
+      combo.textContent = "x" + count;
+      combo.classList.remove("pop"); void combo.offsetWidth; combo.classList.add("pop");
+    }
+    // если перестали жать — едем к видео, как обычно
+    timer = setTimeout(() => {
+      count = 0;
+      $("#videos").scrollIntoView({ behavior: "smooth" });
+    }, 650);
+  });
+
+  function confetti() {
+    const colors = ["#ff0000", "#ffffff", "#ffd21f", "#ff0000", "#ff7a7a"];
+    const n = innerWidth < 720 ? 90 : 170;
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement("div");
+      const type = i % 5;                           // 0 — кнопка play, остальные — бумажки
+      c.className = "confetti" + (type === 0 ? " yt" : "");
+      const size = type === 0 ? 18 + Math.random() * 14 : 7 + Math.random() * 9;
+      c.style.cssText = `left:${Math.random() * 100}vw;--w:${size}px;--h:${type === 0 ? size * .7 : size * (.4 + Math.random())}px;` +
+        `--c:${colors[i % colors.length]};--sway:${(Math.random() - .5) * 220}px;--rot:${(Math.random() - .5) * 1440}deg;` +
+        `animation-duration:${2.6 + Math.random() * 2.2}s;animation-delay:${Math.random() * 1.2}s`;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 6200);
+    }
+  }
+})();
+
+// ===== ПАСХАЛКА 2: набрать BOYZ → режим хаоса на 10 секунд =====
+(() => {
+  const code = ["KeyB", "KeyO", "KeyY", "KeyZ"];   // по физическим клавишам — работает и на русской раскладке
+  let pos = 0, active = false;
+  addEventListener("keydown", (e) => {
+    if (document.body.classList.contains("loading") || active) return;
+    if (e.code === code[pos]) {
+      pos++;
+      if (pos === code.length) { pos = 0; chaos(); }
+    } else pos = e.code === code[0] ? 1 : 0;
+  });
+
+  function chaos() {
+    active = true;
+    const html = document.documentElement;
+    html.classList.add("chaos");
+    // разные задержки, чтобы всё трясло вразнобой
+    document.querySelectorAll(".title .ch, .member, .video, .features article, .stats div").forEach((el) => {
+      el.style.setProperty("--cd", (Math.random() * -.6).toFixed(2) + "s");
+    });
+    const toast = document.createElement("div");
+    toast.className = "chaos-toast";
+    document.body.appendChild(toast);
+    Sound.play("chaos");
+    let left = 10;
+    const tick = () => {
+      toast.textContent = `😈 РЕЖИМ ХАОСА · ${left}`;
+      if (left-- <= 0) {
+        html.classList.remove("chaos");
+        toast.classList.add("bye");
+        setTimeout(() => toast.remove(), 400);
+        active = false;
+        return;
+      }
+      setTimeout(tick, 1000);
+    };
+    tick();
+  }
 })();
 
 // ===== 3D-наклон карточек за мышкой =====
